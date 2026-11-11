@@ -1,0 +1,44 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px 10px;
+    background: #222;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+h1 {
+    font-size: 36px;
+}
+
+p {
+    font-size: 18px;
+}
+
+canvas {
+    display: block;
+    width: 400px;
+    max-width: 95vw;
+    height: auto;
+    margin: 15px auto;
+    background: black;
+    border: 2px solid white;
+}
+
+button {
+    padding: 12px 22px;
+    background: limegreen;
+    color: black;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+[hidden] {
+    display: none !important;
+}

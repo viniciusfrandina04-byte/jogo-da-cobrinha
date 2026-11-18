@@ -1,33 +1,35 @@
 const canvas = document.getElementById("jogo");
 const ctx = canvas.getContext("2d");
 
-const pontosTexto = document.getElementById("pontos");
-const mensagem = document.getElementById("mensagem");
+const pontosElemento = document.getElementById("pontos");
+const mensagemElemento = document.getElementById("mensagem");
 
 const tamanho = 20;
 
 let cobra = [];
-let direcao = { x: tamanho, y: 0 };
-let proximaDirecao = { x: tamanho, y: 0 };
+let comida = {};
 
-let comida;
+let direcao = {
+    x: tamanho,
+    y: 0
+};
+
+let proximaDirecao = {
+    x: tamanho,
+    y: 0
+};
+
 let pontos = 0;
-
 let jogoRodando = true;
 let jogoIniciado = false;
 
-function ajustarCanvas() {
+function ajustarTela() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
 
-ajustarCanvas();
-
-window.addEventListener("resize", () => {
-    ajustarCanvas();
-});
-
-function iniciar() {
+function iniciarJogo() {
+    ajustarTela();
 
     cobra = [
         {
@@ -48,26 +50,38 @@ function iniciar() {
 
     pontos = 0;
 
-    pontosTexto.textContent = pontos;
-
-    comida = gerarComida();
+    pontosElemento.textContent = "0";
 
     jogoRodando = true;
     jogoIniciado = false;
 
-    mensagem.textContent = "Use as setas ou WASD para começar.";
-    mensagem.style.color = "#ccc";
+    mensagemElemento.textContent =
+        "Use as setas ou WASD para começar.";
+
+    mensagemElemento.style.color = "#ccc";
+
+    gerarComida();
 }
 
 function gerarComida() {
-
     const colunas = Math.floor(canvas.width / tamanho);
     const linhas = Math.floor(canvas.height / tamanho);
 
-    return {
+    comida = {
         x: Math.floor(Math.random() * colunas) * tamanho,
         y: Math.floor(Math.random() * linhas) * tamanho
     };
+
+    // Evita colocar a comida dentro da cobra
+    for (const parte of cobra) {
+        if (
+            comida.x === parte.x &&
+            comida.y === parte.y
+        ) {
+            gerarComida();
+            return;
+        }
+    }
 }
 
 document.addEventListener("keydown", (event) => {
@@ -90,7 +104,7 @@ document.addEventListener("keydown", (event) => {
         jogoIniciado = true;
     }
 
-    if (
+    else if (
         (tecla === "arrowdown" || tecla === "s") &&
         direcao.y === 0
     ) {
@@ -102,7 +116,7 @@ document.addEventListener("keydown", (event) => {
         jogoIniciado = true;
     }
 
-    if (
+    else if (
         (tecla === "arrowleft" || tecla === "a") &&
         direcao.x === 0
     ) {
@@ -114,7 +128,7 @@ document.addEventListener("keydown", (event) => {
         jogoIniciado = true;
     }
 
-    if (
+    else if (
         (tecla === "arrowright" || tecla === "d") &&
         direcao.x === 0
     ) {
@@ -143,10 +157,11 @@ function desenharCobra() {
             7
         );
 
-        ctx.fillStyle =
-            index === 0
-                ? "#69ff8c"
-                : "#35c759";
+        if (index === 0) {
+            ctx.fillStyle = "#6cff8f";
+        } else {
+            ctx.fillStyle = "#32c95b";
+        }
 
         ctx.fill();
 
@@ -155,12 +170,30 @@ function desenharCobra() {
 
 function desenharComida() {
 
+    const centroX = comida.x + tamanho / 2;
+    const centroY = comida.y + tamanho / 2;
+
+    // Brilho
     ctx.beginPath();
 
     ctx.arc(
-        comida.x + tamanho / 2,
-        comida.y + tamanho / 2,
-        tamanho / 2 - 3,
+        centroX,
+        centroY,
+        9,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fillStyle = "rgba(255, 60, 60, 0.25)";
+    ctx.fill();
+
+    // Comida
+    ctx.beginPath();
+
+    ctx.arc(
+        centroX,
+        centroY,
+        7,
         0,
         Math.PI * 2
     );
@@ -196,7 +229,7 @@ function atualizar() {
         y: cobra[0].y + direcao.y
     };
 
-    // Bateu na parede
+    // Colisão com as paredes
     if (
         novaCabeca.x < 0 ||
         novaCabeca.x >= canvas.width ||
@@ -207,7 +240,7 @@ function atualizar() {
         return;
     }
 
-    // Bateu no próprio corpo
+    // Colisão com o próprio corpo
     for (let i = 0; i < cobra.length; i++) {
 
         if (
@@ -230,9 +263,9 @@ function atualizar() {
 
         pontos++;
 
-        pontosTexto.textContent = pontos;
+        pontosElemento.textContent = pontos;
 
-        comida = gerarComida();
+        gerarComida();
 
     } else {
 
@@ -245,13 +278,13 @@ function perder() {
 
     jogoRodando = false;
 
-    mensagem.textContent =
-        "Fim de jogo! Pontuação: " + pontos;
+    mensagemElemento.textContent =
+        "FIM DE JOGO! Pontuação: " + pontos;
 
-    mensagem.style.color = "#ff3b30";
+    mensagemElemento.style.color = "#ff4d4d";
 
     // Não existe botão de reiniciar.
-    // Depois de perder, o jogo fica encerrado.
+    // O jogo permanece encerrado.
 }
 
 function loop() {
@@ -264,5 +297,13 @@ function loop() {
     }
 }
 
-iniciar();
+window.addEventListener("resize", () => {
+
+    if (jogoRodando) {
+        ajustarTela();
+    }
+
+});
+
+iniciarJogo();
 loop();

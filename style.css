@@ -1,239 +1,93 @@
-const canvas = document.getElementById("jogo");
-const ctx = canvas.getContext("2d");
-
-const tamanho = 20;
-const colunas = canvas.width / tamanho;
-const linhas = canvas.height / tamanho;
-
-const placar = document.getElementById("pontos");
-const mensagem = document.getElementById("mensagem");
-const botao = document.getElementById("reiniciar");
-
-let cobra, comida, dx, dy, pontos;
-let iniciou, terminou, proximaDirecao;
-
-function novaComida() {
-    const livres = [];
-
-    for (let y = 0; y < linhas; y++) {
-        for (let x = 0; x < colunas; x++) {
-            const pos = {
-                x: x * tamanho,
-                y: y * tamanho
-            };
-
-            if (!cobra.some(p => p.x === pos.x && p.y === pos.y)) {
-                livres.push(pos);
-            }
-        }
-    }
-
-    return livres.length
-        ? livres[Math.floor(Math.random() * livres.length)]
-        : null;
+* {
+    box-sizing: border-box;
 }
 
-function reiniciar() {
-    cobra = [{ x: 200, y: 200 }];
+body {
+    margin: 0;
+    padding: 20px 10px;
 
-    dx = 0;
-    dy = 0;
+    background: #222;
+    color: white;
 
-    proximaDirecao = null;
-
-    pontos = 0;
-    iniciou = false;
-    terminou = false;
-
-    placar.textContent = "0";
-
-    mensagem.textContent =
-        "Use as setas ou WASD para começar.";
-
-    botao.hidden = true;
-
-    comida = novaComida();
-
-    desenhar();
+    font-family: Arial, sans-serif;
+    text-align: center;
 }
 
-function desenhar() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Fundo
-    ctx.fillStyle = "#050505";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Comida
-    if (comida) {
-        const centroX = comida.x + tamanho / 2;
-        const centroY = comida.y + tamanho / 2;
-
-        // Brilho
-        ctx.shadowColor = "#ff3030";
-        ctx.shadowBlur = 10;
-
-        ctx.fillStyle = "#ff3030";
-
-        ctx.beginPath();
-        ctx.arc(
-            centroX,
-            centroY,
-            7,
-            0,
-            Math.PI * 2
-        );
-        ctx.fill();
-
-        ctx.shadowBlur = 0;
-    }
-
-    // Cobrinha
-    cobra.forEach((parte, index) => {
-
-        const margem = 2;
-        const x = parte.x + margem;
-        const y = parte.y + margem;
-        const tamanhoParte = tamanho - margem * 2;
-
-        // Cabeça um pouco mais destacada
-        if (index === 0) {
-            ctx.fillStyle = "#39ff14";
-            ctx.shadowColor = "#39ff14";
-            ctx.shadowBlur = 8;
-        } else {
-            ctx.fillStyle = "#20d83a";
-            ctx.shadowColor = "#20d83a";
-            ctx.shadowBlur = 4;
-        }
-
-        // Segmento arredondado
-        ctx.beginPath();
-
-        ctx.roundRect(
-            x,
-            y,
-            tamanhoParte,
-            tamanhoParte,
-            7
-        );
-
-        ctx.fill();
-
-        ctx.shadowBlur = 0;
-
-        // Pequeno brilho na parte superior
-        ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
-
-        ctx.beginPath();
-
-        ctx.roundRect(
-            x + 3,
-            y + 2,
-            tamanhoParte - 6,
-            3,
-            2
-        );
-
-        ctx.fill();
-    });
+h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
 }
 
-function fim(texto) {
-    terminou = true;
-
-    mensagem.textContent =
-        texto + " Pontuação: " + pontos;
-
-    botao.hidden = false;
+p {
+    font-size: 18px;
 }
 
-document.addEventListener("keydown", event => {
-    const tecla = event.key.toLowerCase();
+canvas {
+    display: block;
 
-    const direcoes = {
-        arrowup: [0, -tamanho],
-        w: [0, -tamanho],
+    width: 400px;
+    max-width: 95vw;
+    height: auto;
 
-        arrowdown: [0, tamanho],
-        s: [0, tamanho],
+    margin: 15px auto;
 
-        arrowleft: [-tamanho, 0],
-        a: [-tamanho, 0],
+    background: #050505;
 
-        arrowright: [tamanho, 0],
-        d: [tamanho, 0]
-    };
+    border: 3px solid white;
+    border-radius: 12px;
 
-    if (!direcoes[tecla]) return;
-
-    event.preventDefault();
-
-    if (terminou || proximaDirecao) return;
-
-    const [novoDx, novoDy] = direcoes[tecla];
-
-    if (iniciou && novoDx === -dx && novoDy === -dy) {
-        return;
-    }
-
-    proximaDirecao = [novoDx, novoDy];
-    iniciou = true;
-});
-
-function atualizar() {
-    if (!iniciou || terminou) return;
-
-    if (proximaDirecao) {
-        [dx, dy] = proximaDirecao;
-        proximaDirecao = null;
-    }
-
-    const cabeca = {
-        x: cobra[0].x + dx,
-        y: cobra[0].y + dy
-    };
-
-    const comeu = comida &&
-        cabeca.x === comida.x &&
-        cabeca.y === comida.y;
-
-    const corpo = comeu ? cobra : cobra.slice(0, -1);
-
-    if (
-        cabeca.x < 0 ||
-        cabeca.x >= canvas.width ||
-        cabeca.y < 0 ||
-        cabeca.y >= canvas.height ||
-        corpo.some(
-            p => p.x === cabeca.x && p.y === cabeca.y
-        )
-    ) {
-        fim("Fim de jogo!");
-        return;
-    }
-
-    cobra.unshift(cabeca);
-
-    if (comeu) {
-        pontos++;
-
-        placar.textContent = pontos;
-
-        comida = novaComida();
-
-        if (!comida) {
-            fim("Você venceu!");
-        }
-    } else {
-        cobra.pop();
-    }
-
-    desenhar();
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.12);
 }
 
-botao.addEventListener("click", reiniciar);
+button {
+    padding: 12px 22px;
 
-reiniciar();
+    background: #39d353;
+    color: #111;
 
-setInterval(atualizar, 180);
+    border: none;
+    border-radius: 10px;
+
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+
+    transition: 0.15s;
+}
+
+button:hover {
+    background: #4bea63;
+    transform: scale(1.03);
+}
+
+button:active {
+    transform: scale(0.96);
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 15px 8px;
+    }
+
+    h1 {
+        font-size: 30px;
+    }
+
+    p {
+        font-size: 16px;
+    }
+
+    canvas {
+        max-width: 92vw;
+        border-radius: 14px;
+    }
+
+    button {
+        padding: 13px 24px;
+        font-size: 17px;
+    }
+}

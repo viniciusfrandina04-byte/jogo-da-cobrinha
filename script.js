@@ -3,9 +3,18 @@ const ctx = canvas.getContext("2d");
 
 const pontosTexto = document.getElementById("pontos");
 const mensagem = document.getElementById("mensagem");
-const botaoReiniciar = document.getElementById("reiniciar");
 
-const tamanhoBase = 20;
+const tamanho = 20;
+
+let cobra = [];
+let direcao = { x: tamanho, y: 0 };
+let proximaDirecao = { x: tamanho, y: 0 };
+
+let comida;
+let pontos = 0;
+
+let jogoRodando = true;
+let jogoIniciado = false;
 
 function ajustarCanvas() {
     canvas.width = window.innerWidth;
@@ -14,86 +23,131 @@ function ajustarCanvas() {
 
 ajustarCanvas();
 
-window.addEventListener("resize", ajustarCanvas);
+window.addEventListener("resize", () => {
+    ajustarCanvas();
+});
 
-let cobra = [
-    { x: 200, y: 200 },
-    { x: 180, y: 200 },
-    { x: 160, y: 200 }
-];
+function iniciar() {
 
-let direcao = { x: tamanhoBase, y: 0 };
-let proximaDirecao = { x: tamanhoBase, y: 0 };
+    cobra = [
+        {
+            x: Math.floor(canvas.width / 2 / tamanho) * tamanho,
+            y: Math.floor(canvas.height / 2 / tamanho) * tamanho
+        }
+    ];
 
-let comida = gerarComida();
+    direcao = {
+        x: tamanho,
+        y: 0
+    };
 
-let pontos = 0;
-let jogoRodando = true;
-let jogoIniciado = false;
+    proximaDirecao = {
+        x: tamanho,
+        y: 0
+    };
+
+    pontos = 0;
+
+    pontosTexto.textContent = pontos;
+
+    comida = gerarComida();
+
+    jogoRodando = true;
+    jogoIniciado = false;
+
+    mensagem.textContent = "Use as setas ou WASD para começar.";
+    mensagem.style.color = "#ccc";
+}
 
 function gerarComida() {
-    const colunas = Math.floor(canvas.width / tamanhoBase);
-    const linhas = Math.floor(canvas.height / tamanhoBase);
+
+    const colunas = Math.floor(canvas.width / tamanho);
+    const linhas = Math.floor(canvas.height / tamanho);
 
     return {
-        x: Math.floor(Math.random() * colunas) * tamanhoBase,
-        y: Math.floor(Math.random() * linhas) * tamanhoBase
+        x: Math.floor(Math.random() * colunas) * tamanho,
+        y: Math.floor(Math.random() * linhas) * tamanho
     };
 }
 
-document.addEventListener("keydown", function (event) {
+document.addEventListener("keydown", (event) => {
 
-    if (!jogoRodando) return;
+    if (!jogoRodando) {
+        return;
+    }
+
+    const tecla = event.key.toLowerCase();
 
     if (
-        (event.key === "ArrowUp" || event.key.toLowerCase() === "w") &&
+        (tecla === "arrowup" || tecla === "w") &&
         direcao.y === 0
     ) {
-        proximaDirecao = { x: 0, y: -tamanhoBase };
+        proximaDirecao = {
+            x: 0,
+            y: -tamanho
+        };
+
         jogoIniciado = true;
     }
 
     if (
-        (event.key === "ArrowDown" || event.key.toLowerCase() === "s") &&
+        (tecla === "arrowdown" || tecla === "s") &&
         direcao.y === 0
     ) {
-        proximaDirecao = { x: 0, y: tamanhoBase };
+        proximaDirecao = {
+            x: 0,
+            y: tamanho
+        };
+
         jogoIniciado = true;
     }
 
     if (
-        (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") &&
+        (tecla === "arrowleft" || tecla === "a") &&
         direcao.x === 0
     ) {
-        proximaDirecao = { x: -tamanhoBase, y: 0 };
+        proximaDirecao = {
+            x: -tamanho,
+            y: 0
+        };
+
         jogoIniciado = true;
     }
 
     if (
-        (event.key === "ArrowRight" || event.key.toLowerCase() === "d") &&
+        (tecla === "arrowright" || tecla === "d") &&
         direcao.x === 0
     ) {
-        proximaDirecao = { x: tamanhoBase, y: 0 };
+        proximaDirecao = {
+            x: tamanho,
+            y: 0
+        };
+
         jogoIniciado = true;
     }
 });
 
 function desenharCobra() {
+
     cobra.forEach((parte, index) => {
+
+        const margem = 2;
 
         ctx.beginPath();
 
-        const raio = 8;
-
         ctx.roundRect(
-            parte.x + 2,
-            parte.y + 2,
-            tamanhoBase - 4,
-            tamanhoBase - 4,
-            raio
+            parte.x + margem,
+            parte.y + margem,
+            tamanho - margem * 2,
+            tamanho - margem * 2,
+            7
         );
 
-        ctx.fillStyle = index === 0 ? "#66ff88" : "#35c759";
+        ctx.fillStyle =
+            index === 0
+                ? "#69ff8c"
+                : "#35c759";
+
         ctx.fill();
 
     });
@@ -104,9 +158,9 @@ function desenharComida() {
     ctx.beginPath();
 
     ctx.arc(
-        comida.x + tamanhoBase / 2,
-        comida.y + tamanhoBase / 2,
-        tamanhoBase / 2 - 3,
+        comida.x + tamanho / 2,
+        comida.y + tamanho / 2,
+        tamanho / 2 - 3,
         0,
         Math.PI * 2
     );
@@ -118,11 +172,15 @@ function desenharComida() {
 
 function desenhar() {
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
     desenharComida();
     desenharCobra();
-
 }
 
 function atualizar() {
@@ -181,20 +239,19 @@ function atualizar() {
         cobra.pop();
 
     }
-
 }
 
 function perder() {
 
     jogoRodando = false;
 
-    mensagem.textContent = "GAME OVER — você perdeu!";
+    mensagem.textContent =
+        "Fim de jogo! Pontuação: " + pontos;
 
     mensagem.style.color = "#ff3b30";
 
-    // Não mostra botão para reiniciar
-    botaoReiniciar.hidden = true;
-
+    // Não existe botão de reiniciar.
+    // Depois de perder, o jogo fica encerrado.
 }
 
 function loop() {
@@ -205,7 +262,7 @@ function loop() {
     if (jogoRodando) {
         setTimeout(loop, 100);
     }
-
 }
 
+iniciar();
 loop();

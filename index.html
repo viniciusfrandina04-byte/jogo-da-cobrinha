@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,24 +11,21 @@
 
 <body>
 
-    <div class="container">
-
+    <div class="interface">
         <h1>Jogo da Cobrinha</h1>
 
-        <p id="pontuacao">
-            Pontuação: <span id="pontos">0</span>
-        </p>
+        <div class="informacoes">
+            <span>Pontuação: <strong id="pontos">0</strong></span>
+        </div>
 
-        <p id="mensagem">
+        <div id="mensagem">
             Use as setas ou WASD para começar.
-        </p>
-
-        <canvas id="jogo"></canvas>
-
+        </div>
     </div>
+
+    <canvas id="jogo"></canvas>
 
     <script src="script.js"></script>
 
 </body>
-
 </html>

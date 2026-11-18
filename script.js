@@ -4,306 +4,389 @@ const ctx = canvas.getContext("2d");
 const pontosElemento = document.getElementById("pontos");
 const mensagemElemento = document.getElementById("mensagem");
 
-const tamanho = 20;
+const TAMANHO = 20;
 
 let cobra = [];
 let comida = {};
 
-let direcao = {
-    x: tamanho,
-    y: 0
-};
-
-let proximaDirecao = {
-    x: tamanho,
-    y: 0
-};
+let direcao = "direita";
+let proximaDirecao = "direita";
 
 let pontos = 0;
-let jogoRodando = true;
-let jogoIniciado = false;
+let jogoAtivo = true;
+
+let ultimoMovimento = 0;
+const velocidade = 100;
+
+
+// ==========================
+// TAMANHO DA TELA
+// ==========================
 
 function ajustarTela() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
 
+
+// ==========================
+// INICIAR JOGO
+// ==========================
+
 function iniciarJogo() {
+
     ajustarTela();
 
+    const centroX =
+        Math.floor(canvas.width / TAMANHO / 2) * TAMANHO;
+
+    const centroY =
+        Math.floor(canvas.height / TAMANHO / 2) * TAMANHO;
+
     cobra = [
-        {
-            x: Math.floor(canvas.width / 2 / tamanho) * tamanho,
-            y: Math.floor(canvas.height / 2 / tamanho) * tamanho
-        }
+        { x: centroX, y: centroY },
+        { x: centroX - TAMANHO, y: centroY },
+        { x: centroX - TAMANHO * 2, y: centroY }
     ];
-
-    direcao = {
-        x: tamanho,
-        y: 0
-    };
-
-    proximaDirecao = {
-        x: tamanho,
-        y: 0
-    };
 
     pontos = 0;
 
-    pontosElemento.textContent = "0";
+    pontosElemento.textContent = pontos;
 
-    jogoRodando = true;
-    jogoIniciado = false;
+    direcao = "direita";
+    proximaDirecao = "direita";
+
+    jogoAtivo = true;
 
     mensagemElemento.textContent =
-        "Use as setas ou WASD para começar.";
+        "Use as setas ou WASD para jogar";
 
-    mensagemElemento.style.color = "#ccc";
+    mensagemElemento.style.color = "#ddd";
 
-    gerarComida();
+    criarComida();
 }
 
-function gerarComida() {
-    const colunas = Math.floor(canvas.width / tamanho);
-    const linhas = Math.floor(canvas.height / tamanho);
 
-    comida = {
-        x: Math.floor(Math.random() * colunas) * tamanho,
-        y: Math.floor(Math.random() * linhas) * tamanho
-    };
+// ==========================
+// CRIAR COMIDA
+// ==========================
 
-    // Evita colocar a comida dentro da cobra
-    for (const parte of cobra) {
-        if (
-            comida.x === parte.x &&
-            comida.y === parte.y
-        ) {
-            gerarComida();
-            return;
-        }
-    }
+function criarComida() {
+
+    const colunas =
+        Math.floor(canvas.width / TAMANHO);
+
+    const linhas =
+        Math.floor(canvas.height / TAMANHO);
+
+    let novaComida;
+
+    do {
+
+        novaComida = {
+            x: Math.floor(Math.random() * colunas) * TAMANHO,
+            y: Math.floor(Math.random() * linhas) * TAMANHO
+        };
+
+    } while (
+        cobra.some(
+            parte =>
+                parte.x === novaComida.x &&
+                parte.y === novaComida.y
+        )
+    );
+
+    comida = novaComida;
 }
 
-document.addEventListener("keydown", (event) => {
 
-    if (!jogoRodando) {
-        return;
-    }
+// ==========================
+// CONTROLES
+// ==========================
+
+document.addEventListener("keydown", function (event) {
 
     const tecla = event.key.toLowerCase();
 
+    if (!jogoAtivo) {
+        return;
+    }
+
     if (
         (tecla === "arrowup" || tecla === "w") &&
-        direcao.y === 0
+        direcao !== "baixo"
     ) {
-        proximaDirecao = {
-            x: 0,
-            y: -tamanho
-        };
-
-        jogoIniciado = true;
+        proximaDirecao = "cima";
     }
 
     else if (
         (tecla === "arrowdown" || tecla === "s") &&
-        direcao.y === 0
+        direcao !== "cima"
     ) {
-        proximaDirecao = {
-            x: 0,
-            y: tamanho
-        };
-
-        jogoIniciado = true;
+        proximaDirecao = "baixo";
     }
 
     else if (
         (tecla === "arrowleft" || tecla === "a") &&
-        direcao.x === 0
+        direcao !== "direita"
     ) {
-        proximaDirecao = {
-            x: -tamanho,
-            y: 0
-        };
-
-        jogoIniciado = true;
+        proximaDirecao = "esquerda";
     }
 
     else if (
         (tecla === "arrowright" || tecla === "d") &&
-        direcao.x === 0
+        direcao !== "esquerda"
     ) {
-        proximaDirecao = {
-            x: tamanho,
-            y: 0
-        };
-
-        jogoIniciado = true;
+        proximaDirecao = "direita";
     }
 });
 
-function desenharCobra() {
 
-    cobra.forEach((parte, index) => {
-
-        const margem = 2;
-
-        ctx.beginPath();
-
-        ctx.roundRect(
-            parte.x + margem,
-            parte.y + margem,
-            tamanho - margem * 2,
-            tamanho - margem * 2,
-            7
-        );
-
-        if (index === 0) {
-            ctx.fillStyle = "#6cff8f";
-        } else {
-            ctx.fillStyle = "#32c95b";
-        }
-
-        ctx.fill();
-
-    });
-}
-
-function desenharComida() {
-
-    const centroX = comida.x + tamanho / 2;
-    const centroY = comida.y + tamanho / 2;
-
-    // Brilho
-    ctx.beginPath();
-
-    ctx.arc(
-        centroX,
-        centroY,
-        9,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fillStyle = "rgba(255, 60, 60, 0.25)";
-    ctx.fill();
-
-    // Comida
-    ctx.beginPath();
-
-    ctx.arc(
-        centroX,
-        centroY,
-        7,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fillStyle = "#ff3b30";
-    ctx.fill();
-
-}
-
-function desenhar() {
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-    desenharComida();
-    desenharCobra();
-}
+// ==========================
+// ATUALIZAR COBRA
+// ==========================
 
 function atualizar() {
 
-    if (!jogoRodando || !jogoIniciado) {
-        return;
-    }
-
     direcao = proximaDirecao;
 
-    const novaCabeca = {
-        x: cobra[0].x + direcao.x,
-        y: cobra[0].y + direcao.y
+    const cabeca = {
+        x: cobra[0].x,
+        y: cobra[0].y
     };
 
-    // Colisão com as paredes
+
+    // Movimento
+
+    if (direcao === "cima") {
+        cabeca.y -= TAMANHO;
+    }
+
+    if (direcao === "baixo") {
+        cabeca.y += TAMANHO;
+    }
+
+    if (direcao === "esquerda") {
+        cabeca.x -= TAMANHO;
+    }
+
+    if (direcao === "direita") {
+        cabeca.x += TAMANHO;
+    }
+
+
+    // ==========================
+    // BATEU NA PAREDE
+    // ==========================
+
     if (
-        novaCabeca.x < 0 ||
-        novaCabeca.x >= canvas.width ||
-        novaCabeca.y < 0 ||
-        novaCabeca.y >= canvas.height
+        cabeca.x < 0 ||
+        cabeca.y < 0 ||
+        cabeca.x >= canvas.width ||
+        cabeca.y >= canvas.height
     ) {
         perder();
         return;
     }
 
-    // Colisão com o próprio corpo
+
+    // ==========================
+    // BATEU NO PRÓPRIO CORPO
+    // ==========================
+
     for (let i = 0; i < cobra.length; i++) {
 
         if (
-            novaCabeca.x === cobra[i].x &&
-            novaCabeca.y === cobra[i].y
+            cabeca.x === cobra[i].x &&
+            cabeca.y === cobra[i].y
         ) {
             perder();
             return;
         }
-
     }
 
-    cobra.unshift(novaCabeca);
 
-    // Comeu a comida
+    // Coloca nova cabeça
+
+    cobra.unshift(cabeca);
+
+
+    // ==========================
+    // COMEU
+    // ==========================
+
     if (
-        novaCabeca.x === comida.x &&
-        novaCabeca.y === comida.y
+        cabeca.x === comida.x &&
+        cabeca.y === comida.y
     ) {
 
         pontos++;
 
         pontosElemento.textContent = pontos;
 
-        gerarComida();
+        criarComida();
 
     } else {
 
+        // Remove a cauda
         cobra.pop();
-
     }
 }
 
+
+// ==========================
+// DESENHAR
+// ==========================
+
+function desenhar() {
+
+    // Fundo
+
+    ctx.fillStyle = "#181818";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    // Grade
+
+    ctx.strokeStyle = "rgba(255,255,255,0.025)";
+    ctx.lineWidth = 1;
+
+    for (
+        let x = 0;
+        x < canvas.width;
+        x += TAMANHO
+    ) {
+
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+
+    for (
+        let y = 0;
+        y < canvas.height;
+        y += TAMANHO
+    ) {
+
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+
+
+    // ==========================
+    // COMIDA
+    // ==========================
+
+    ctx.beginPath();
+
+    ctx.arc(
+        comida.x + TAMANHO / 2,
+        comida.y + TAMANHO / 2,
+        7,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fillStyle = "#ff3b30";
+
+    ctx.fill();
+
+
+    // ==========================
+    // COBRA
+    // ==========================
+
+    for (let i = 0; i < cobra.length; i++) {
+
+        const parte = cobra[i];
+
+        ctx.beginPath();
+
+        const margem = 2;
+
+        ctx.roundRect(
+            parte.x + margem,
+            parte.y + margem,
+            TAMANHO - margem * 2,
+            TAMANHO - margem * 2,
+            6
+        );
+
+        if (i === 0) {
+            ctx.fillStyle = "#65ff8a";
+        } else {
+            ctx.fillStyle = "#35c759";
+        }
+
+        ctx.fill();
+    }
+}
+
+
+// ==========================
+// GAME OVER
+// ==========================
+
 function perder() {
 
-    jogoRodando = false;
+    jogoAtivo = false;
 
     mensagemElemento.textContent =
         "FIM DE JOGO! Pontuação: " + pontos;
 
     mensagemElemento.style.color = "#ff4d4d";
 
-    // Não existe botão de reiniciar.
-    // O jogo permanece encerrado.
+    desenhar();
 }
 
-function loop() {
 
-    atualizar();
+// ==========================
+// LOOP DO JOGO
+// ==========================
+
+function loop(tempo) {
+
+    if (!ultimoMovimento) {
+        ultimoMovimento = tempo;
+    }
+
+    if (
+        jogoAtivo &&
+        tempo - ultimoMovimento >= velocidade
+    ) {
+
+        atualizar();
+
+        ultimoMovimento = tempo;
+    }
+
     desenhar();
 
-    if (jogoRodando) {
-        setTimeout(loop, 100);
-    }
+    requestAnimationFrame(loop);
 }
 
-window.addEventListener("resize", () => {
 
-    if (jogoRodando) {
+// ==========================
+// INICIAR
+// ==========================
+
+window.addEventListener("resize", function () {
+
+    if (jogoAtivo) {
         ajustarTela();
     }
 
 });
 
 iniciarJogo();
-loop();
+
+requestAnimationFrame(loop);

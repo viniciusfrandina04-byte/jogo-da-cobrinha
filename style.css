@@ -1,93 +1,89 @@
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
 }
 
 body {
-    margin: 0;
-    padding: 20px 10px;
-
-    background: #222;
+    background: #111;
     color: white;
-
     font-family: Arial, sans-serif;
-    text-align: center;
+    overflow: hidden;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
 }
 
 h1 {
-    font-size: 36px;
-    margin-bottom: 10px;
+    position: absolute;
+    top: 20px;
+
+    color: #4ade80;
+    font-size: 32px;
 }
 
 p {
-    font-size: 18px;
+    position: absolute;
+    z-index: 2;
+}
+
+p:first-of-type {
+    top: 65px;
+    font-size: 20px;
+}
+
+#mensagem {
+    top: 95px;
+    color: #ccc;
+}
+
+#pontos {
+    color: #4ade80;
+    font-weight: bold;
 }
 
 canvas {
     display: block;
 
-    width: 400px;
-    max-width: 95vw;
-    height: auto;
+    width: 100vw;
+    height: 100vh;
 
-    margin: 15px auto;
-
-    background: #050505;
-
-    border: 3px solid white;
-    border-radius: 12px;
-
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.12);
+    background: #181818;
 }
 
 button {
-    padding: 12px 22px;
+    position: absolute;
+    bottom: 30px;
 
-    background: #39d353;
-    color: #111;
+    padding: 12px 25px;
 
     border: none;
     border-radius: 10px;
 
-    cursor: pointer;
-    font-size: 16px;
+    background: #4ade80;
+    color: #111;
+
+    font-size: 17px;
     font-weight: bold;
 
-    transition: 0.15s;
+    cursor: pointer;
 }
 
 button:hover {
-    background: #4bea63;
-    transform: scale(1.03);
-}
-
-button:active {
-    transform: scale(0.96);
-}
-
-[hidden] {
-    display: none !important;
-}
-
-@media (max-width: 500px) {
-    body {
-        padding: 15px 8px;
-    }
-
-    h1 {
-        font-size: 30px;
-    }
-
-    p {
-        font-size: 16px;
-    }
-
-    canvas {
-        max-width: 92vw;
-        border-radius: 14px;
-    }
-
-    button {
-        padding: 13px 24px;
-        font-size: 17px;
-    }
+    transform: scale(1.05);
 }

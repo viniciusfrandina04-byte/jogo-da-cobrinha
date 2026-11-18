@@ -1,34 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jogo da Cobrinha</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
 <body>
 
     <div class="container">
 
         <h1>Jogo da Cobrinha</h1>
 
-        <p>Pontuação: <span id="pontos">0</span></p>
+        <p>
+            Pontuação:
+            <span id="pontos">0</span>
+        </p>
 
         <p id="mensagem">
             Use as setas ou WASD para começar.
         </p>
 
-        <canvas id="jogo" width="400" height="400"></canvas>
+        <canvas
+            id="jogo"
+            width="400"
+            height="400"
+        ></canvas>
 
-        <div class="controles">
-            <button id="cima">▲</button>
-            <button id="esquerda">◀</button>
-            <button id="baixo">▼</button>
-            <button id="direita">▶</button>
-        </div>
-
-        <button id="reiniciar" type="button" hidden>
+        <button
+            id="reiniciar"
+            type="button"
+            hidden
+        >
             Jogar novamente
         </button>
-
-        <p>
-            Pegue as facas e não bata nas paredes nem em você mesmo.
-        </p>
 
     </div>
 
     <script src="script.js"></script>
 
 </body>
+
+</html>
